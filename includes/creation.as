@@ -148,6 +148,7 @@ public function chooseStartingRace(race:String = "human"):void {
 		pc.addTailFlag(GLOBAL.FLAG_SCALED);
 		pc.addTailFlag(GLOBAL.FLAG_PREHENSILE);
 		pc.skinType = GLOBAL.SKIN_TYPE_SCALES;
+		pc.genitalSpot = 2;
 		CodexManager.unlockEntry("Leithan");
 		pc.scaleColor = "black";
 		this.addButton(0,"Male",setStartingSex,1);
@@ -200,6 +201,8 @@ public function setStartingSex(sex:int = 1):void {
 		}
 		if (pc.originalRace == "half-ausar") {
 			pc.shiftCock(0,GLOBAL.TYPE_CANINE);
+			//Get rid of sheath for reasons
+			pc.cocks[0].delFlag(GLOBAL.FLAG_SHEATHED);
 		}
 		if (pc.originalRace ==  "half-kaithrit") {
 			pc.shiftCock(0,GLOBAL.TYPE_FELINE);

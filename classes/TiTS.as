@@ -92,6 +92,7 @@
 		include "../includes/game.as";
 		include "../includes/lightsOut.as";
 		include "../includes/items.as";
+		include "../includes/MailEntries.as";
 		include "../includes/masturbation.as";
 		include "../includes/NPCTemplates.as";
 		include "../includes/rooms.as";
@@ -154,6 +155,7 @@
 		include "../includes/tarkus.aurora.as";
 		include "../includes/tarkus.colenso.as";
 		include "../includes/tarkus.drBadger.as";
+		include "../includes/tarkus.drLash.as";
 		include "../includes/tarkus.dumbfuckBonus.as";
 		include "../includes/tarkus.grayGoo.as";
 		include "../includes/tarkus.lane.as";
@@ -306,7 +308,7 @@
 
 			trace("TiTS Constructor")
 
-			version = "0.5.47";
+			version = "0.5.49";
 
 			//temporary nonsense variables.
 			temp = 0;
@@ -394,6 +396,7 @@
 		{
 			this.removeEventListener(Event.FRAME_CONSTRUCTED, finishInit);
 			this.configureCodex();
+			this.configureMails();
 			this.userInterface.showMainMenu();
 			this.userInterface.toggleBarTweens();
 			buildWTF();
@@ -637,19 +640,6 @@
 		public function refreshFontSize():void
 		{
 			userInterface.refreshFontSize(gameOptions.fontSize);
-		}
-		
-		public function showCodex():void
-		{
-			this.userInterface.showCodex();
-			this.codexHomeFunction();
-			this.clearGhostMenu();
-			// TESTO BUTTONO
-			//addGhostButton(0, "Database", function():void { } );
-			//addGhostButton(1, "Messages", function():void { } );
-			//addGhostButton(2, "Log", function():void { } );
-			//addGhostButton(3, "CHEEVOS", function():void { } );
-			addGhostButton(4, "Back", this.userInterface.showPrimaryOutput);
 		}
 		
 		public function levelUpHandler(e:Event = null):void

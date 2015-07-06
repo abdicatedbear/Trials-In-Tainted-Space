@@ -9,6 +9,7 @@ import classes.Items.Accessories.LeithaCharm;
 import classes.Items.Miscellaneous.HorsePill;
 import classes.RoomClass;
 import classes.StorageClass;
+import classes.UIComponents.ContentModules.MailModule;
 import classes.UIComponents.SquareButton;
 import flash.events.Event;
 
@@ -99,6 +100,9 @@ public function mainGameMenu():void {
 			}
 		}
 	}
+	
+	// Update the state of the players mails -- we don't want to do this all the time (ie in process time), and we're only going to care about it at the menu root soooooo...
+	updateMailStatus();
 	
 	//Set up all appropriate flags
 	//Display the room description
@@ -206,7 +210,22 @@ public function mainGameMenu():void {
 	
 	// Enable the perk list button
 	(userInterface as GUI).perkDisplayButton.Activate();
-	(userInterface as GUI).statsDisplayButton.Activate();
+}
+
+public function showCodex():void
+{
+	this.userInterface.showCodex();
+	this.codexHomeFunction();
+	this.clearGhostMenu();
+	
+	// TESTO BUTTONO
+	addGhostButton(0, "Stats", statisticsScreen);
+	
+	//addGhostButton(1, "Messages", function():void { } );
+	//addGhostButton(2, "Log", function():void { } );
+	//addGhostButton(3, "CHEEVOS", function():void { } );
+	
+	addGhostButton(4, "Back", this.userInterface.showPrimaryOutput);
 }
 
 // Temp display stuff for perks
@@ -225,18 +244,80 @@ public function showPerkListHandler(e:Event = null):void
 	}
 }
 
-public function showStatsHandler(e:Event = null):void
+public function showMailsHandler(e:Event = null):void
 {
-	var pButton:SquareButton = (userInterface as GUI).statsDisplayButton;
+	var pButton:SquareButton = (userInterface as GUI).mailsDisplayButton;
+	
+	if (flags["PC_EMAIL_ADDRESS"] == undefined)
+	{
+		(userInterface as GUI).showSecondaryOutput();
+		initialMailConfiguration();
+		return;
+	}
+	
 	if (pButton.isActive && !pButton.isHighlighted)
 	{
-		statisticsScreen();
+		showMails();
 		pButton.Highlight();
 	}
 	else if (pButton.isActive && pButton.isHighlighted)
 	{
 		userInterface.showPrimaryOutput();
 		pButton.DeHighlight();
+	}
+}
+
+public function showMails():void
+{
+	userInterface.showMails();
+	codexMailFunction();
+}
+
+public function codexMailFunction():void
+{
+	var m:MailModule = (userInterface as GUI).mailModule;
+	
+	m.htmlText = "<span class='words'><p>";
+	m.htmlText += "Welcome to the Steele Industries® CODEX™ Extranet Messenger Extension.";
+	m.htmlText += "\n\nThe Codex EME system allows you, as a user of a Steele Industries® CODEX™ device, to exchange messages with other EME system users, allowing you to keep a historical record of various communications and transactions.";
+	m.htmlText += "\n\nRecieved messages are displayed to the right of the CODEX™ display, with as-yet unread messages sorted to the top and displayed in <b>bold</b>.\n\nThe CODEX™ root menu will alert you to new messages via an un-obtrusive notification - the access icon for the system will display as a green icon when unread messages are detected.";
+	m.htmlText += "</p></span>";
+	
+	clearGhostMenu();
+	addGhostButton(4, "Back", showMailsHandler);
+}
+
+import classes.GameData.MailManager;
+import classes.GUI;
+import classes.UIComponents.UIStyleSettings;
+
+public function updateMailStatus():void
+{
+	// Initial mail config option!
+	if (flags["PC_EMAIL_ADDRESS"] == undefined)
+	{
+		userInterface.mailsDisplayButton.Activate();
+		userInterface.mailsDisplayButton.iconColour = UIStyleSettings.gStatusGoodColour;
+		return;
+	}
+	
+	// No mails, disable button
+	if (!MailManager.hasUnlockedEntries())
+	{
+		(userInterface as GUI).mailsDisplayButton.Deactivate();
+		(userInterface as GUI).mailsDisplayButton.iconColour = 0xFFFFFF;
+	}
+	// Has mails, no new mails
+	else if (!MailManager.hasUnreadEntries())
+	{
+		(userInterface as GUI).mailsDisplayButton.Activate();
+		(userInterface as GUI).mailsDisplayButton.iconColour = 0xFFFFFF;
+	}
+	// Has new mails
+	else
+	{
+		(userInterface as GUI).mailsDisplayButton.Activate();
+		(userInterface as GUI).mailsDisplayButton.iconColour = UIStyleSettings.gStatusGoodColour;
 	}
 }
 
@@ -558,7 +639,7 @@ public function flyTo(arg:String):void {
 		currentLocation = "201";
 		output("You slow your ship down as you near the orbit of your next destination, Tarkus. As you scale down past a third of the speed of light, the planet begins to come into view: surrounded by a dense field of asteroids loom the two sundered halves of the goblin world. At first glance this appears to be a lifeless system, however, as the ships sensor suite comes online instruments alert you to extreme electromagnetic interference emanating from the planet below, suggesting a power source in the multi-petawatt range. The planet, or perhaps more accurately the rended halves of the former planet, is blatantly chained together with a massive space tether whose every link must be the size of a Terran cruiser! Surely it must have taken the resources of the entire system to erect such a technological marvel: No wonder new pioneers are so interested in this place.");
 		output("\n\nSlowly but surely, the ship picks through shards of rock that must have once been part of the planet's core and mantle. Further in however the field seems to largely consist of orbital debris rather than planetary ejecta: hulls of space ships and ruined clumps of satellites mashed together over centuries of disuse flit past you at thousands of kilometers per hour, making your approach difficult. More than once unidentified high velocity particles are intercepted by your shields, a grim reminder your ship is barely equipped to survive this landing. Finally you're through. The console to your front chirps as heat shields engage and you enter the upper atmosphere.");
-		output("\n\n For several minutes all you can hear is the hum of the shield generator much louder than before as it works to deflect and absorb much of the heat created by drag as you descend. \n\n\ Finally the vibration subsides and your view is restored as the heat shields slide open, just in time for you to see yourself punch through a thick cloud layer that leaves a mask of water droplets at the edges of your cockpit window. Although still high above the planet, you make out the surface below as mostly red speckled with flecks of silver and gray. The sea resembles acrylic paints that have undergone mixing at the hands of an overzealous toddler; hideous black and green hues garishly reflect the harsh light of Tarkus's star KP0384128J");
+		output("\n\n For several minutes all you can hear is the hum of the shield generator as it works to deflect and absorb much of the heat created by drag and atmospheric compression as you descend. \n\n\ Finally the vibration subsides and your view is restored as the heat shields slide open, just in time for you to see yourself punch through a thick cloud layer that leaves a mask of water droplets at the edges of your cockpit window. Although still high above the planet, you make out the surface below as mostly red speckled with flecks of silver and gray. The sea resembles acrylic paints that have undergone mixing at the hands of an overzealous toddler; hideous black and green hues garishly reflect the harsh light of Tarkus's star KP0384128J");
 		output("\n\n Entry process winks green and your altitude control system switches to local ref. 300 kilometers out from the beacon you slow to a polite mach one in towards the impact site of the ancient and disintegrating capital ship you saw from orbit. The ship is surrounded by mechanical detritus from all sides and powdered with red dusts from a wasteland which stretches as far as your eye can see to the east. It rests on the shore of the strange shimmering black sea. The land here is little more than a junkyard, one more world ravished by the march of progress until it was little more than a skeleton. The dead land sends a chill down your spine while you wait for permission to land. As you vector to one of the dimly lit hangers you fly past an ancient QR code dating from the brief but colorful Information Age of Man that reads simply; NOVA. \"<i>Goddamn the ship is prehistoric!</i>\" you think as the Z14 eases into your appointed docking bay - a hastily spray-painted square on the deck, surrounded by other explorers' ships.");
 	}
 	else if(arg == "New Texas") {
@@ -1230,6 +1311,8 @@ public function processTime(arg:int):void {
 				
 				// Lane monies
 				laneHandleCredits();
+				//Venus pitcher
+				venusSubmission(-1);
 			}
 		}
 		arg--;
@@ -1666,7 +1749,7 @@ public function statisticsScreen():void
 {
 	clearOutput2();
 	clearGhostMenu();
-	addGhostButton(14, "Back", showStatsHandler);
+	addGhostButton(14, "Back", showCodex);
 	
 	output2("<b><u>Personal Statistics:</u></b>\n");
 	output2("<b>Alcohol Tolerance: </b>" + pc.tolerance() + "/100\n");
@@ -1706,6 +1789,8 @@ public function statisticsScreen():void
 	output2("<b>Critical Chance, Ranged: </b>" + pc.critBonus(false) + "%\n");
 	output2("<b>Evasion Bonus: </b>" + pc.evasion() + "%\n");
 
+
+	//======NPC STATISTICS=====//
 	output2("\n<b><u>NPC Statistics:</u></b>\n");
 	if(flags["RESCUE KIRO FROM BLUEBALLS"] == 1) output2("<b>Kiro's Trust: </b>" + kiroTrust() + "%\n");
 	//Lane shit
@@ -1722,6 +1807,9 @@ public function statisticsScreen():void
 	if (flags["SAEN MET AT THE BAR"] != undefined) output2("<b>Saendra's Affection: </b>" + saendraAffection() + "% (69% Max)\n");
 	if (flags["KELLY_ATTRACTION"] != undefined) output2("<b>Kelly's Attraction: </b>" + flags["KELLY_ATTRACTION"] + "%\n");
 
+
+
+	//=====GENERAL STATS=====//
 	output2("\n<b><u>General Statistics:</u></b>\n");
 	output2("<b>Crew, Recruited: </b>" + crewRecruited() + "\n");
 	output2("<b>Crew, Onboard: </b>" + crew(true) + "\n");
@@ -1736,6 +1824,8 @@ public function statisticsScreen():void
 	{
 		output2("<b>Vanae Deflowered: </b>" + StatTracking.getStat("characters/maiden vanae/cherrys popped") + "\n");
 	}
+	if(flags["TIMES_CAUGHT_BY_ELDER_VENUS_PITCHER"] != undefined) output2("<b>Venus Pitcher Elders, Times Hypnotized By: </b>" + flags["TIMES_CAUGHT_BY_ELDER_VENUS_PITCHER"] + "\n");
+	if(venusSubmission() > 0) output2("<b>Venus Pitcher Elders, Submission: </b>" + Math.round(venusSubmission()*10)/10 + "%\n");
 	var totalVirginitiesTaken:Number = StatTracking.getStat("characters/maiden vanae/cherrys popped");
 	if(!chars["KIRO"].vaginalVirgin) totalVirginitiesTaken++;
 	if(!embry.vaginalVirgin) totalVirginitiesTaken++;
